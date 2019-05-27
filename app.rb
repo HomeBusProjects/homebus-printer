@@ -21,11 +21,11 @@ class PrinterHomeBusApp < HomeBusApp
       @sysName = vb.value.to_s if  vb.name.to_s == 'SNMPv2-MIB::sysName.0'
       @sysDescr = vb.value.to_s if  vb.name.to_s == 'SNMPv2-MIB::sysDescr.0'
       @sysLocation = vb.value.to_s if  vb.name.to_s == 'SNMPv2-MIB::sysLocation.0'
-      @serial_number = vb.value.to_i if vb.name.to_s == '1.3.6.1.2.1.1.5.0'
-      @model = vb.value.to_i if vb.name.to_s == '1.3.6.1.2.1.25.3.2.1.3.1'
+      @serial_number = vb.value.to_s if vb.name.to_s == '1.3.6.1.2.1.1.5.0'
+      @model = vb.value.to_s if vb.name.to_s == '1.3.6.1.2.1.25.3.2.1.3.1'
     end
 
-    puts @sysName, @sysDescr, @sysLocation
+    puts @sysName, @sysDescr, @sysLocation, @model, @serial_number
 
   end
 
@@ -34,7 +34,7 @@ class PrinterHomeBusApp < HomeBusApp
     response.each_varbind do |vb|
       remaining_belt_unit_pages = vb.value.to_i if vb.name.to_s == '1.3.6.1.2.1.43.11.1.1.9.1.6'
       remaining_drum_unit_pages = vb.value.to_i if vb.name.to_s == '1.3.6.1.2.1.43.11.1.1.9.1.7'
-      status  = vb.value.to_i if vb.name.to_s == '1.3.6.1.2.1.43.16.5.1.2.1.1'
+      status  = vb.value.to_s if vb.name.to_s == '1.3.6.1.2.1.43.16.5.1.2.1.1'
       total_page_count = vb.value.to_i if vb.name.to_s == '1.3.6.1.2.1.43.10.2.1.4.1.1'
       pp vb
     end
