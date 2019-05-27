@@ -1,0 +1,20 @@
+[Unit]
+Description=HomeBus printer activity publisher
+After=network.target
+
+[Service]
+Type=simple
+
+User=homebus
+WorkingDirectory=/home/homebus/homebus-printer
+
+ExecStart=/home/homebus/.rbenv/bin/rbenv exec bundle exec homebus-printer.rb -a 10.0.1.116 -c public -N eth1
+TimeoutSec=30
+
+Restart=always
+RestartSec=90
+StartLimitInterval=400
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
