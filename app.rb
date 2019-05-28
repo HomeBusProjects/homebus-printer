@@ -56,6 +56,9 @@ class PrinterHomeBusApp < HomeBusApp
     if(status != @old_status || total_page_count != @old_total_page_count)
       timestamp = Time.now.to_i
 
+      @old_status = status
+      @old_total_page_count = total_page_count
+
       @mqtt.publish '/printer',
                     JSON.generate({ id: @uuid,
                                     timestamp: timestamp,
