@@ -8,7 +8,7 @@ Type=simple
 User=homebus
 WorkingDirectory=/home/homebus/homebus-printer
 
-ExecStart=/home/homebus/.rbenv/bin/rbenv exec bundle exec homebus-printer.rb -a 10.0.1.116 -c public -N eth1
+ExecStart=/home/homebus/.rbenv/bin/rbenv exec bundle exec homebus-printer.rb -a 10.0.1.116 -c public
 TimeoutSec=30
 
 Restart=always
