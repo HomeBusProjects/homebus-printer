@@ -62,10 +62,14 @@ class PrinterHomeBusApp < HomeBusApp
       @mqtt.publish '/printer',
                     JSON.generate({ id: @uuid,
                                     timestamp: timestamp,
-                                    model: @model,
-                                    serial_number: @serial_number,
-                                    status: status,
-                                    total_page_count: total_page_count,
+                                    system: {
+                                      model: @model,
+                                      serial_number: @serial_number
+                                    },
+                                    status: {
+                                      message: status,
+                                      total_page_count: total_page_count,
+                                    },
                                     resources: [
                                       {
                                         name: 'remaining_belt_unit_pages',
@@ -79,7 +83,7 @@ class PrinterHomeBusApp < HomeBusApp
                                   }),
                     true
     end
-
+    
     sleep 60
   end
 
