@@ -56,7 +56,7 @@ class PrinterHomeBusApp < HomeBusApp
     if(status_msg != '' && (status != @old_status || total_page_count != @old_total_page_count))
       timestamp = Time.now.to_i
 
-      @old_status = status
+      @old_status = status_msg
       @old_total_page_count = total_page_count
 
       status = { id: @uuid,
