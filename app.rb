@@ -53,7 +53,7 @@ class PrinterHomeBusApp < HomeBusApp
     rescue
     end
 
-    if(status_msg != '' && (status != @old_status || total_page_count != @old_total_page_count))
+    if(status_msg != '' && (status_msg != @old_status || total_page_count != @old_total_page_count))
       timestamp = Time.now.to_i
 
       @old_status = status_msg
