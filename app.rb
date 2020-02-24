@@ -5,6 +5,8 @@ require 'mqtt'
 require 'json'
 
 class PrinterHomeBusApp < HomeBusApp
+  DDC = 'org.homebus.experimental.printer'
+
   def initialize(options)
     @options = options
 
@@ -35,53 +37,58 @@ class PrinterHomeBusApp < HomeBusApp
   end
 
   def work!
-    status = ''
+    status_msg = ''
     total_page_count = 0
     remaining_belt_unit_pages = 0
     remaining_drum_unit_pages = 0
 
-    response = @manager.get([ '1.3.6.1.2.1.43.11.1.1.9.1.6', '1.3.6.1.2.1.43.11.1.1.9.1.7', '1.3.6.1.2.1.43.16.5.1.2.1.1', '1.3.6.1.2.1.43.10.2.1.4.1.1' ])
-    response.each_varbind do |vb|
-      remaining_belt_unit_pages = vb.value.to_i if vb.name.to_s == 'SNMPv2-SMI::mib-2.43.11.1.1.9.1.6'
-      remaining_drum_unit_pages = vb.value.to_i if vb.name.to_s == 'SNMPv2-SMI::mib-2.43.11.1.1.9.1.7'
-      status  = vb.value.to_s if vb.name.to_s == 'SNMPv2-SMI::mib-2.43.16.5.1.2.1.1'
-      total_page_count = vb.value.to_i if vb.name.to_s == 'SNMPv2-SMI::mib-2.43.10.2.1.4.1.1'
+    begin
+      response = @manager.get([ '1.3.6.1.2.1.43.11.1.1.9.1.6', '1.3.6.1.2.1.43.11.1.1.9.1.7', '1.3.6.1.2.1.43.16.5.1.2.1.1', '1.3.6.1.2.1.43.10.2.1.4.1.1' ])
+      response.each_varbind do |vb|
+        remaining_belt_unit_pages = vb.value.to_i if vb.name.to_s == 'SNMPv2-SMI::mib-2.43.11.1.1.9.1.6'
+        remaining_drum_unit_pages = vb.value.to_i if vb.name.to_s == 'SNMPv2-SMI::mib-2.43.11.1.1.9.1.7'
+        status_msg  = vb.value.to_s if vb.name.to_s == 'SNMPv2-SMI::mib-2.43.16.5.1.2.1.1'
+        total_page_count = vb.value.to_i if vb.name.to_s == 'SNMPv2-SMI::mib-2.43.10.2.1.4.1.1'
+      end
+    rescue
     end
 
-
-    if @options[:verbose]
-      pp results
-    end
-
-    if(status != @old_status || total_page_count != @old_total_page_count)
+    if(status_msg != '' && (status != @old_status || total_page_count != @old_total_page_count))
       timestamp = Time.now.to_i
 
       @old_status = status
       @old_total_page_count = total_page_count
 
-      @mqtt.publish '/printer',
-                    JSON.generate({ id: @uuid,
-                                    timestamp: timestamp,
-                                    system: {
-                                      model: @model,
-                                      serial_number: @serial_number
-                                    },
-                                    status: {
-                                      message: status,
-                                      total_page_count: total_page_count,
-                                    },
-                                    resources: [
-                                      {
-                                        name: 'remaining_belt_unit_pages',
-                                        count: remaining_belt_unit_pages
-                                      },
-                                      {
-                                        name: 'remaining_drum_unit_pages',
-                                        count: remaining_drum_unit_pages
-                                      }
-                                    ]
-                                  }),
-                    true
+      status = { id: @uuid,
+                 timestamp: timestamp
+               }
+
+      status[DDC] = {
+        system: {
+          model: @model,
+          serial_number: @serial_number
+        },
+        status: {
+          message: status_msg,
+          total_page_count: total_page_count,
+        },
+        resources: [
+          {
+            name: 'remaining_belt_unit_pages',
+            count: remaining_belt_unit_pages
+          },
+          {
+            name: 'remaining_drum_unit_pages',
+            count: remaining_drum_unit_pages
+          }
+        ]
+      }
+
+    if @options[:verbose]
+      pp status
+    end
+
+      publish! DDC, status
     end
     
     sleep 60
@@ -119,7 +126,7 @@ class PrinterHomeBusApp < HomeBusApp
         index: 0,
         accuracy: 0,
         precision: 0,
-        wo_topics: [ '/printers' ],
+        wo_topics: [ DDC ],
         ro_topics: [],
         rw_topics: []
       }
