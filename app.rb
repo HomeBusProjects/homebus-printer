@@ -54,16 +54,10 @@ class PrinterHomeBusApp < HomeBusApp
     end
 
     if(status_msg != '' && (status_msg != @old_status || total_page_count != @old_total_page_count))
-      timestamp = Time.now.to_i
-
       @old_status = status_msg
       @old_total_page_count = total_page_count
 
-      status = { id: @uuid,
-                 timestamp: timestamp
-               }
-
-      status[DDC] = {
+      status = {
         system: {
           model: @model,
           serial_number: @serial_number
